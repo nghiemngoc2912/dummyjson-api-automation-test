@@ -7,18 +7,18 @@ public class ConfigManager {
 
     static {
         String env = System.getProperty("env", "qa");
-        String file = "config-"+env+".properties";
+        String file = "config-" + env + ".properties";
 
-        try(var is = ConfigManager.class
+        try (var is = ConfigManager.class
                 .getClassLoader()
-                .getResourceAsStream(file)){
+                .getResourceAsStream(file)) {
             prop.load(is);
-        }catch(Exception e){
+        } catch (Exception e) {
             throw new RuntimeException();
         }
     }
 
-    public static String get(String key){
+    public static String get(String key) {
         return prop.getProperty(key);
     }
 }

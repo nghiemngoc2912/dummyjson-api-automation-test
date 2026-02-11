@@ -7,7 +7,7 @@ import io.restassured.specification.RequestSpecification;
 import static io.restassured.RestAssured.given;
 
 public class BaseApi {
-    protected RequestSpecification request(){
+    protected RequestSpecification request() {
         return RestAssured.given()
                 .baseUri(ConfigManager.get("base.url"))
                 .contentType("application/json");
