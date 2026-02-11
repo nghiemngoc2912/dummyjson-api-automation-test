@@ -20,7 +20,6 @@
             <groupId>io.rest-assured</groupId>
             <artifactId>rest-assured</artifactId>
             <version>6.0.0</version>
-            <scope>test</scope>
         </dependency>
 
         <!-- TestNG -->
@@ -28,7 +27,6 @@
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
             <version>7.11.0</version>
-            <scope>test</scope>
         </dependency>
 
         <!-- JSON Schema Validation -->
@@ -36,7 +34,6 @@
             <groupId>io.rest-assured</groupId>
             <artifactId>json-schema-validator</artifactId>
             <version>6.0.0</version>
-            <scope>test</scope>
         </dependency>
     </dependencies>
 
