@@ -14,4 +14,8 @@ public class AuthTestData {
         return new LoginRequest(username, password);
     }
 
+    public static LoginRequest nullPasswordLoginRequest() {
+        String username = "emilys", password = null;
+        return new LoginRequest(username, password);
+    }
 }

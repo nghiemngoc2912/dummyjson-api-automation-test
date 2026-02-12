@@ -40,4 +40,14 @@ public class LoginTest extends BaseTest {
         AuthAssertion.verifyLoginUnsuccess(loginResponse, AuthMessage.USERNAME_PASSWORD_REQUIRED);
     }
 
+    @Test(description = "auth_login_003 - Login unsuccessfully - password null")
+    public void auth_login_002_PasswordNull() {
+        //test data
+        LoginRequest loginRequest = AuthTestData.nullPasswordLoginRequest();
+        //call api login
+        Response loginResponse = authService.login(loginRequest);
+        //verify login response unsuccess
+        AuthAssertion.verifyLoginUnsuccess(loginResponse, AuthMessage.USERNAME_PASSWORD_REQUIRED);
+    }
+
 }
