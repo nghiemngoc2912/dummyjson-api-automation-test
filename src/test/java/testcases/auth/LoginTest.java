@@ -2,6 +2,7 @@ package testcases.auth;
 
 import assertions.auth.AuthAssertion;
 import base.BaseTest;
+import constants.auth.AuthMessage;
 import io.restassured.response.Response;
 import models.auth.LoginRequest;
 import org.testng.annotations.Test;
@@ -12,7 +13,7 @@ public class LoginTest extends BaseTest {
     AuthService authService = new AuthService();
 
     @Test(description = "auth_login_001 - Login successfully")
-    public void auth_login_001_loginSuccessfully(){
+    public void auth_login_001_loginSuccessfully() {
         //test data
         LoginRequest loginRequest = AuthTestData.validLoginRequest();
         //call api login
@@ -28,4 +29,15 @@ public class LoginTest extends BaseTest {
         //verify current user correct
         AuthAssertion.verifyCurrentUser(currentUserResponse, loginResponse);
     }
+
+    @Test(description = "auth_login_002 - Login unsuccessfully - username null")
+    public void auth_login_002_usernameNull() {
+        //test data
+        LoginRequest loginRequest = AuthTestData.nullUsernameLoginRequest();
+        //call api login
+        Response loginResponse = authService.login(loginRequest);
+        //verify login response unsuccess
+        AuthAssertion.verifyLoginUnsuccess(loginResponse, AuthMessage.USERNAME_PASSWORD_REQUIRED);
+    }
+
 }
