@@ -34,7 +34,7 @@ public class LoginTest extends BaseTest {
     }
 
     @Test(description = "auth_login_003 - Login unsuccessfully - password null")
-    public void auth_login_003_PasswordNull() {
+    public void auth_login_003_passwordNull() {
         //test data
         LoginRequest loginRequest = AuthTestData.nullPasswordLoginRequest();
         //call api login
@@ -44,7 +44,7 @@ public class LoginTest extends BaseTest {
     }
 
     @Test(description = "auth_login_004 - Login unsuccessfully - Username not exist")
-    public void auth_login_004_UsernameNotExist() {
+    public void auth_login_004_usernameNotExist() {
         //test data
         LoginRequest loginRequest = AuthTestData.userNameNotExistLoginRequest();
         //call api login
@@ -54,7 +54,7 @@ public class LoginTest extends BaseTest {
     }
 
     @Test(description = "auth_login_005 - Login unsuccessfully - Password not match")
-    public void auth_login_005_PasswordNotMatch() {
+    public void auth_login_005_passwordNotMatch() {
         //test data
         LoginRequest loginRequest = AuthTestData.passwordNotMatchLoginRequest();
         //call api login
