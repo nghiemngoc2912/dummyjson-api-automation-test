@@ -2,7 +2,7 @@ package testcases.auth;
 
 import assertions.auth.AuthAssertion;
 import base.BaseTest;
-import constants.auth.AuthMessage;
+import constants.auth.GetCurrentUserMessage;
 import io.restassured.response.Response;
 import models.auth.LoginRequest;
 import org.testng.annotations.Test;
@@ -25,6 +25,16 @@ public class GetCurrentUserTest extends BaseTest {
 
         //verify current user correct
         AuthAssertion.verifyCurrentUser(currentUserResponse, loginResponse);
+    }
+
+    @Test(description = "auth_getCurrentUser_002 - Verify get current user response unsuccessful: Token Null")
+    public void auth_getCurrentUser_002_tokenNull() {
+        //call api current user
+        String token = null;
+        Response currentUserResponse = authService.getCurrentUser(token);
+
+        //verify current user correct
+        AuthAssertion.verifyCurrentUserUnsuccessful(currentUserResponse, GetCurrentUserMessage.TOKEN_INVALID);
     }
 
 }

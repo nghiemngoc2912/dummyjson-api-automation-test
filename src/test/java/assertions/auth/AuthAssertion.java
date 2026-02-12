@@ -41,4 +41,12 @@ public class AuthAssertion {
                 .body("image", equalTo(loginJson.getString("image")))
         ;
     }
+
+    public static void verifyCurrentUserUnsuccessful(Response currentUserResponse, String message) {
+        currentUserResponse.then()
+                .log().ifValidationFails()
+                .statusCode(400)
+                .body("message", equalTo(message))
+        ;
+    }
 }

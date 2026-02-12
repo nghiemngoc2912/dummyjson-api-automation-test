@@ -15,4 +15,9 @@ public class AuthService {
         String token = loginResponse.jsonPath().getString("accessToken");
         return client.getCurrentAuthUser(token);
     }
+
+    public Response getCurrentUser(String token) {
+        return client.getCurrentAuthUser(token);
+    }
+
 } 
