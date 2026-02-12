@@ -37,4 +37,14 @@ public class GetCurrentUserTest extends BaseTest {
         AuthAssertion.verifyCurrentUserUnsuccessful(currentUserResponse, GetCurrentUserMessage.TOKEN_INVALID);
     }
 
+    @Test(description = "auth_getCurrentUser_003 - Verify get current user response unsuccessful: Token Not Match")
+    public void auth_getCurrentUser_003_tokenNotMatch() {
+        //call api current user
+        String token = "@";
+        Response currentUserResponse = authService.getCurrentUser(token);
+
+        //verify current user correct
+        AuthAssertion.verifyCurrentUserUnsuccessful(currentUserResponse, GetCurrentUserMessage.TOKEN_INVALID);
+    }
+
 }
