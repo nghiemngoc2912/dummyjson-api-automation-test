@@ -60,4 +60,14 @@ public class LoginTest extends BaseTest {
         AuthAssertion.verifyLoginUnsuccess(loginResponse, AuthMessage.ACCOUNT_NOT_EXIST);
     }
 
+    @Test(description = "auth_login_005 - Login unsuccessfully - Password not match")
+    public void auth_login_005_PasswordNotMatch() {
+        //test data
+        LoginRequest loginRequest = AuthTestData.passwordNotMatchLoginRequest();
+        //call api login
+        Response loginResponse = authService.login(loginRequest);
+        //verify login response unsuccess
+        AuthAssertion.verifyLoginUnsuccess(loginResponse, AuthMessage.ACCOUNT_NOT_EXIST);
+    }
+
 }

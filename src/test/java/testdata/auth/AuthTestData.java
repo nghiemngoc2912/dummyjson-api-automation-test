@@ -24,4 +24,8 @@ public class AuthTestData {
         return new LoginRequest(username, password);
     }
 
+    public static LoginRequest passwordNotMatchLoginRequest() {
+        String username = "emilys", password = "emilyspasss";
+        return new LoginRequest(username, password);
+    }
 }
