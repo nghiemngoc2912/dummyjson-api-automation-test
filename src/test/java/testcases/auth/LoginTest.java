@@ -41,13 +41,23 @@ public class LoginTest extends BaseTest {
     }
 
     @Test(description = "auth_login_003 - Login unsuccessfully - password null")
-    public void auth_login_002_PasswordNull() {
+    public void auth_login_003_PasswordNull() {
         //test data
         LoginRequest loginRequest = AuthTestData.nullPasswordLoginRequest();
         //call api login
         Response loginResponse = authService.login(loginRequest);
         //verify login response unsuccess
         AuthAssertion.verifyLoginUnsuccess(loginResponse, AuthMessage.USERNAME_PASSWORD_REQUIRED);
+    }
+
+    @Test(description = "auth_login_004 - Login unsuccessfully - Username not exist")
+    public void auth_login_004_UsernameNotExist() {
+        //test data
+        LoginRequest loginRequest = AuthTestData.userNameNotExistLoginRequest();
+        //call api login
+        Response loginResponse = authService.login(loginRequest);
+        //verify login response unsuccess
+        AuthAssertion.verifyLoginUnsuccess(loginResponse, AuthMessage.ACCOUNT_NOT_EXIST);
     }
 
 }

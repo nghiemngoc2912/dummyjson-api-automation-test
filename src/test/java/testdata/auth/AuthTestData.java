@@ -18,4 +18,10 @@ public class AuthTestData {
         String username = "emilys", password = null;
         return new LoginRequest(username, password);
     }
+
+    public static LoginRequest userNameNotExistLoginRequest() {
+        String username = "emily", password = "emilyspass";
+        return new LoginRequest(username, password);
+    }
+
 }
