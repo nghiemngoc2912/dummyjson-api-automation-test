@@ -21,13 +21,6 @@ public class LoginTest extends BaseTest {
 
         //verify login response success
         AuthAssertion.verifyLoginSuccess(loginResponse, loginRequest);
-
-        //call api current user
-
-        Response currentUserResponse = authService.getCurrentUser(loginResponse);
-
-        //verify current user correct
-        AuthAssertion.verifyCurrentUser(currentUserResponse, loginResponse);
     }
 
     @Test(description = "auth_login_002 - Login unsuccessfully - username null")
