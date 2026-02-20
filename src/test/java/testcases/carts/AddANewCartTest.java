@@ -1,17 +1,12 @@
 package testcases.carts;
 
-import assertions.auth.AuthAssertion;
 import assertions.carts.CartsAssertion;
 import base.BaseTest;
-import constants.auth.LoginMessage;
-import constants.carts.CartsMessage;
+import constants.carts.AddANewCartMessage;
 import io.restassured.response.Response;
-import models.auth.LoginRequest;
 import models.carts.AddANewCartRequest;
 import org.testng.annotations.Test;
-import services.AuthService;
 import services.CartsService;
-import testdata.auth.AuthTestData;
 import testdata.carts.CartsTestData;
 
 public class AddANewCartTest extends BaseTest {
@@ -36,7 +31,7 @@ public class AddANewCartTest extends BaseTest {
         Response addANewCartResponse = cartsService.addANewCart(addANewCartRequest);
 
         //verify cart response
-        CartsAssertion.verifyAddToCartUnsuccessful(addANewCartResponse, String.format(CartsMessage.USERID_NOT_EXIST, addANewCartRequest.getUserId()), 404);
+        CartsAssertion.verifyAddToCartUnsuccessful(addANewCartResponse, String.format(AddANewCartMessage.USERID_NOT_EXIST, addANewCartRequest.getUserId()), 404);
     }
 
     @Test(description = "carts_aanc_003 - Add A New Cart Successfully: ProductId not exist")
@@ -48,6 +43,28 @@ public class AddANewCartTest extends BaseTest {
 
         //verify cart response
         CartsAssertion.verifyAddToCartSuccessful(addANewCartResponse, CartsTestData.productIdNotExistAddANewCartRequestAfterRemovingInvalidProductId(addANewCartRequest.getUserId()));
+    }
+
+    @Test(description = "carts_aanc_004 - Add A New Cart UnSuccessfully: UserId null")
+    public void carts_aanc_004_userIdNull() {
+        //test data
+        AddANewCartRequest addANewCartRequest = CartsTestData.userIdNullAddANewCartRequest();
+        //call api add new cart
+        Response addANewCartResponse = cartsService.addANewCart(addANewCartRequest);
+
+        //verify cart response
+        CartsAssertion.verifyAddToCartUnsuccessful(addANewCartResponse, AddANewCartMessage.USERID_MISSING, 400);
+    }
+
+    @Test(description = "carts_aanc_005 - Add A New Cart Successfully: ProductId null")
+    public void carts_aanc_005_productIdNull() {
+        //test data
+        AddANewCartRequest addANewCartRequest = CartsTestData.productIdNullAddANewCartRequest();
+        //call api add new cart
+        Response addANewCartResponse = cartsService.addANewCart(addANewCartRequest);
+
+        //verify cart response
+        CartsAssertion.verifyAddToCartSuccessful(addANewCartResponse, CartsTestData.productIdNullAddANewCartRequestAfterRemovingInvalidProductId(addANewCartRequest.getUserId()));
     }
 
 }
