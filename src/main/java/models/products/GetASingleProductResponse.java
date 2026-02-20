@@ -1,4 +1,8 @@
 package models.products;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class GetASingleProductResponse {
     private String id;
     private String title;
@@ -6,7 +10,6 @@ public class GetASingleProductResponse {
     private int quantity;
     private double total;
     private double discountPercentage;
-    private double discountedPrice;
     private String thumbnail;
 
     public String getId() {
@@ -31,10 +34,6 @@ public class GetASingleProductResponse {
 
     public double getDiscountPercentage() {
         return discountPercentage;
-    }
-
-    public double getDiscountedPrice() {
-        return discountedPrice;
     }
 
     public String getThumbnail() {

@@ -43,10 +43,11 @@ public class CartsAssertion {
         GetASingleProductResponse product;
         int expectedQuantity;
         double expectedTotal = 0;
+        double expectedDiscountedPrice = 0;
         double expectedDiscountedTotal = 0;
         int expectedTotalQuantity = 0;
         for (int i = 0; i < productsResponse.size(); i++) {
-            if (productsResponse.get(i).getId().equals(productsRequest.get(i).getId())) {
+            if (!productsResponse.get(i).getId().equals(productsRequest.get(i).getId())) {
                 softAssert.fail("Id not match");
             } else {
                 String id = productsResponse.get(i).getId();
@@ -56,12 +57,13 @@ public class CartsAssertion {
                 productInform = productsService.getASingleProduct(id);
                 product = productInform.as(GetASingleProductResponse.class);
                 expectedTotal += product.getPrice() * expectedQuantity;
-                expectedDiscountedTotal += product.getDiscountedPrice() * expectedQuantity;
+                expectedDiscountedPrice = Math.round(expectedQuantity * product.getPrice() * (1 - product.getDiscountPercentage()/100));
+                expectedDiscountedTotal += expectedDiscountedPrice;
                 softAssert.assertEquals(productsResponse.get(i).getTitle(), product.getTitle(), "Title not match in product with id = " + id);
                 softAssert.assertEquals(productsResponse.get(i).getPrice(), product.getPrice(), "Price not match in product with id = " + id);
                 softAssert.assertEquals(productsResponse.get(i).getTotal(), product.getPrice() * expectedQuantity, "Total not match in product with id = " + id);
                 softAssert.assertEquals(productsResponse.get(i).getDiscountPercentage(), product.getDiscountPercentage(), "DiscountPercentage not match in product with id = " + id);
-                softAssert.assertEquals(productsResponse.get(i).getDiscountedPrice(), product.getDiscountedPrice(), "DiscountedPrice not match in product with id = " + id);
+                softAssert.assertEquals(productsResponse.get(i).getDiscountedPrice(), expectedDiscountedPrice, "DiscountedPrice not match in product with id = " + id);
                 softAssert.assertEquals(productsResponse.get(i).getThumbnail(), product.getThumbnail(), "Thumbnail not match in product with id = " + id);
             }
         }
@@ -70,6 +72,8 @@ public class CartsAssertion {
         softAssert.assertEquals(response.getDiscountedTotal(), expectedDiscountedTotal, "DiscountedTotal incorrect");
         softAssert.assertEquals(response.getTotalQuantity(), expectedTotalQuantity, "TotalQuantity incorrect");
         softAssert.assertEquals(response.getTotalProducts(), productsRequest.size(), "TotalProducts incorrect");
+
+        softAssert.assertAll();
     }
 
     public static void verifyAddToCartUnsuccessful(Response addANewCartResponse, String message, int statusCode) {
