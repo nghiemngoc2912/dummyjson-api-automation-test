@@ -18,10 +18,10 @@ public class AuthAssertion {
         ;
     }
 
-    public static void verifyLoginUnsuccess(Response loginResponse, String message) {
+    public static void verifyLoginUnsuccess(Response loginResponse, String message, int statusCode) {
         loginResponse.then()
                 .log().ifValidationFails()
-                .statusCode(400)
+                .statusCode(statusCode)
                 .body("message", equalTo(message))
         ;
     }

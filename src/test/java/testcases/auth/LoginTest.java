@@ -30,7 +30,7 @@ public class LoginTest extends BaseTest {
         //call api login
         Response loginResponse = authService.login(loginRequest);
         //verify login response unsuccess
-        AuthAssertion.verifyLoginUnsuccess(loginResponse, LoginMessage.USERNAME_PASSWORD_REQUIRED);
+        AuthAssertion.verifyLoginUnsuccess(loginResponse, LoginMessage.USERNAME_PASSWORD_REQUIRED, 400);
     }
 
     @Test(description = "auth_login_003 - Login unsuccessfully - password null")
@@ -40,7 +40,7 @@ public class LoginTest extends BaseTest {
         //call api login
         Response loginResponse = authService.login(loginRequest);
         //verify login response unsuccess
-        AuthAssertion.verifyLoginUnsuccess(loginResponse, LoginMessage.USERNAME_PASSWORD_REQUIRED);
+        AuthAssertion.verifyLoginUnsuccess(loginResponse, LoginMessage.USERNAME_PASSWORD_REQUIRED, 400);
     }
 
     @Test(description = "auth_login_004 - Login unsuccessfully - Username not exist")
@@ -50,7 +50,7 @@ public class LoginTest extends BaseTest {
         //call api login
         Response loginResponse = authService.login(loginRequest);
         //verify login response unsuccess
-        AuthAssertion.verifyLoginUnsuccess(loginResponse, LoginMessage.ACCOUNT_NOT_EXIST);
+        AuthAssertion.verifyLoginUnsuccess(loginResponse, LoginMessage.ACCOUNT_NOT_EXIST, 400);
     }
 
     @Test(description = "auth_login_005 - Login unsuccessfully - Password not match")
@@ -60,7 +60,7 @@ public class LoginTest extends BaseTest {
         //call api login
         Response loginResponse = authService.login(loginRequest);
         //verify login response unsuccess
-        AuthAssertion.verifyLoginUnsuccess(loginResponse, LoginMessage.ACCOUNT_NOT_EXIST);
+        AuthAssertion.verifyLoginUnsuccess(loginResponse, LoginMessage.ACCOUNT_NOT_EXIST, 400);
     }
 
 }
