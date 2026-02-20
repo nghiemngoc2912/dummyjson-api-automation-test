@@ -9,6 +9,8 @@ import org.testng.annotations.Test;
 import services.CartsService;
 import testdata.carts.CartsTestData;
 
+import java.util.ArrayList;
+
 public class AddANewCartTest extends BaseTest {
     CartsService cartsService = new CartsService();
 
@@ -63,8 +65,17 @@ public class AddANewCartTest extends BaseTest {
         //call api add new cart
         Response addANewCartResponse = cartsService.addANewCart(addANewCartRequest);
 
+        addANewCartRequest.setProducts(
+                new ArrayList<>(
+                        addANewCartRequest.getProducts()
+                                .stream()
+                                .filter(p -> p.getId() != null)
+                                .toList()
+                )
+        );
+
         //verify cart response
-        CartsAssertion.verifyAddToCartSuccessful(addANewCartResponse, CartsTestData.productIdNullAddANewCartRequestAfterRemovingInvalidProductId(addANewCartRequest.getUserId()));
+        CartsAssertion.verifyAddToCartSuccessful(addANewCartResponse, addANewCartRequest);
     }
 
 }

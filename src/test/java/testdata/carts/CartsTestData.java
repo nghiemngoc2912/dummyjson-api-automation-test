@@ -74,9 +74,4 @@ public class CartsTestData {
         return request;
     }
 
-    public static AddANewCartRequest productIdNullAddANewCartRequestAfterRemovingInvalidProductId(String userId) {
-        AddANewCartRequest request = new AddANewCartRequest();
-        request.setUserId(userId);
-        return request;
-    }
 }
