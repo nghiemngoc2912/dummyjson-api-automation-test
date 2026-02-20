@@ -10,9 +10,10 @@ import org.testng.Assert;
 import org.testng.asserts.SoftAssert;
 import services.ProductsService;
 
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+
+import static org.hamcrest.Matchers.equalTo;
 
 public class CartsAssertion {
     private static ProductsService productsService = new ProductsService();
@@ -69,5 +70,14 @@ public class CartsAssertion {
         softAssert.assertEquals(response.getDiscountedTotal(), expectedDiscountedTotal, "DiscountedTotal incorrect");
         softAssert.assertEquals(response.getTotalQuantity(), expectedTotalQuantity, "TotalQuantity incorrect");
         softAssert.assertEquals(response.getTotalProducts(), productsRequest.size(), "TotalProducts incorrect");
+    }
+
+    public static void verifyAddToCartUnsuccessful(Response addANewCartResponse, String message, int statusCode) {
+        addANewCartResponse
+                .then()
+                .log().ifValidationFails()
+                .statusCode(statusCode)
+                .body("message", equalTo(message));
+
     }
 }

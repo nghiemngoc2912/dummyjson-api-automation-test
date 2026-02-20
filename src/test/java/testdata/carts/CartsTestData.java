@@ -20,4 +20,15 @@ public class CartsTestData {
         return request;
     }
 
+    public static AddANewCartRequest userIdNotExistAddANewCartRequest() {
+        AddANewCartRequest request = new AddANewCartRequest();
+        request.setUserId("-1");
+        request.setProducts(
+                new ArrayList<>(List.of(
+                new AddANewCartRequest.Product("1", "99"),
+                new AddANewCartRequest.Product("2", "1")
+        )));
+        return request;
+    }
+
 }

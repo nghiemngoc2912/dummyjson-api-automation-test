@@ -4,6 +4,7 @@ import assertions.auth.AuthAssertion;
 import assertions.carts.CartsAssertion;
 import base.BaseTest;
 import constants.auth.LoginMessage;
+import constants.carts.CartsMessage;
 import io.restassured.response.Response;
 import models.auth.LoginRequest;
 import models.carts.AddANewCartRequest;
@@ -20,11 +21,22 @@ public class AddANewCartTest extends BaseTest {
     public void carts_aanc_001_addANewCartSuccessfully() {
         //test data
         AddANewCartRequest addANewCartRequest = CartsTestData.validAddANewCartRequest();
-        //call api login
+        //call api add new cart
         Response addANewCartResponse = cartsService.addANewCart(addANewCartRequest);
 
         //verify cart response success
         CartsAssertion.verifyAddToCartSuccessful(addANewCartResponse, addANewCartRequest);
+    }
+
+    @Test(description = "carts_aanc_002 - Add A New Cart Unsuccessfully: UserId not exist")
+    public void carts_aanc_002_userIdNotExist() {
+        //test data
+        AddANewCartRequest addANewCartRequest = CartsTestData.userIdNotExistAddANewCartRequest();
+        //call api add new cart
+        Response addANewCartResponse = cartsService.addANewCart(addANewCartRequest);
+
+        //verify cart response
+        CartsAssertion.verifyAddToCartUnsuccessful(addANewCartResponse, String.format(CartsMessage.USERID_NOT_EXIST, addANewCartRequest.getUserId()), 404);
     }
 
 }
