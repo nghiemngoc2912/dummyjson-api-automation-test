@@ -31,4 +31,26 @@ public class CartsTestData {
         return request;
     }
 
+    public static AddANewCartRequest productIdNotExistAddANewCartRequest() {
+        AddANewCartRequest request = new AddANewCartRequest();
+        request.setUserId(usersService.getAValidUserId());
+        request.setProducts(
+                new ArrayList<>(List.of(
+                        new AddANewCartRequest.Product("-1", "99"),
+                        new AddANewCartRequest.Product("2", "1")
+                )));
+        return request;
+    }
+
+    public static AddANewCartRequest productIdNotExistAddANewCartRequestAfterRemovingInvalidProductId(String userId) {
+        AddANewCartRequest request = new AddANewCartRequest();
+        request.setProducts(
+                new ArrayList<>(List.of(
+                        new AddANewCartRequest.Product("2", "1")
+                )));
+        request.setUserId(userId);
+        return request;
+    }
+
+
 }

@@ -39,4 +39,15 @@ public class AddANewCartTest extends BaseTest {
         CartsAssertion.verifyAddToCartUnsuccessful(addANewCartResponse, String.format(CartsMessage.USERID_NOT_EXIST, addANewCartRequest.getUserId()), 404);
     }
 
+    @Test(description = "carts_aanc_003 - Add A New Cart Successfully: ProductId not exist")
+    public void carts_aanc_003_productIdNotExist() {
+        //test data
+        AddANewCartRequest addANewCartRequest = CartsTestData.productIdNotExistAddANewCartRequest();
+        //call api add new cart
+        Response addANewCartResponse = cartsService.addANewCart(addANewCartRequest);
+
+        //verify cart response
+        CartsAssertion.verifyAddToCartSuccessful(addANewCartResponse, CartsTestData.productIdNotExistAddANewCartRequestAfterRemovingInvalidProductId(addANewCartRequest.getUserId()));
+    }
+
 }
