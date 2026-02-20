@@ -34,7 +34,7 @@ public class GetCurrentUserTest extends BaseTest {
         Response currentUserResponse = authService.getCurrentUser(token);
 
         //verify current user correct
-        AuthAssertion.verifyCurrentUserUnsuccessful(currentUserResponse, GetCurrentUserMessage.TOKEN_INVALID);
+        AuthAssertion.verifyCurrentUserUnsuccessful(currentUserResponse, GetCurrentUserMessage.TOKEN_INVALID, 401);
     }
 
     @Test(description = "auth_getCurrentUser_003 - Verify get current user response unsuccessful: Token Not Match")
@@ -44,7 +44,7 @@ public class GetCurrentUserTest extends BaseTest {
         Response currentUserResponse = authService.getCurrentUser(token);
 
         //verify current user correct
-        AuthAssertion.verifyCurrentUserUnsuccessful(currentUserResponse, GetCurrentUserMessage.TOKEN_INVALID);
+        AuthAssertion.verifyCurrentUserUnsuccessful(currentUserResponse, GetCurrentUserMessage.TOKEN_INVALID, 401);
     }
 
 }

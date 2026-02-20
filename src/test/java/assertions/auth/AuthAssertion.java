@@ -42,10 +42,10 @@ public class AuthAssertion {
         ;
     }
 
-    public static void verifyCurrentUserUnsuccessful(Response currentUserResponse, String message) {
+    public static void verifyCurrentUserUnsuccessful(Response currentUserResponse, String message, int statusCode) {
         currentUserResponse.then()
                 .log().ifValidationFails()
-                .statusCode(401)
+                .statusCode(statusCode)
                 .body("message", equalTo(message))
         ;
     }
