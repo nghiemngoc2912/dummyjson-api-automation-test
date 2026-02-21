@@ -166,4 +166,24 @@ public class AddANewCartTest extends BaseTest {
         CartsAssertion.verifyAddToCartSuccessful(addANewCartResponse, addANewCartRequest);
     }
 
+    @Test(description = "carts_aanc_010 - Add A New Cart Successfully: Quantity Not A Number")
+    public void carts_aanc_010_quantityNaN() {
+        //test data
+        AddANewCartRequest addANewCartRequest = CartsTestData.quantityNaNAddANewCartRequest();
+        //call api add new cart
+        Response addANewCartResponse = cartsService.addANewCart(addANewCartRequest);
+
+        addANewCartRequest.setProducts(
+                new ArrayList<>(
+                        addANewCartRequest.getProducts()
+                                .stream()
+                                .filter(p -> p.getQuantity().matches("\\d+"))
+                                .toList()
+                )
+        );
+
+        //verify cart response
+        CartsAssertion.verifyAddToCartSuccessful(addANewCartResponse, addANewCartRequest);
+    }
+
 }
