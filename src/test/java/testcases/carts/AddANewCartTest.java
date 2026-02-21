@@ -103,4 +103,24 @@ public class AddANewCartTest extends BaseTest {
         CartsAssertion.verifyAddToCartSuccessful(addANewCartResponse, addANewCartRequest);
     }
 
+    @Test(description = "carts_aanc_007 - Add A New Cart Successfully: Quantity < 0")
+    public void carts_aanc_007_quantityLt0() {
+        //test data
+        AddANewCartRequest addANewCartRequest = CartsTestData.quantityLt0AddANewCartRequest();
+        //call api add new cart
+        Response addANewCartResponse = cartsService.addANewCart(addANewCartRequest);
+
+        addANewCartRequest.setProducts(
+                new ArrayList<>(
+                        addANewCartRequest.getProducts()
+                                .stream()
+                                .filter(p -> Integer.parseInt(p.getQuantity()) < 0)
+                                .toList()
+                )
+        );
+
+        //verify cart response
+        CartsAssertion.verifyAddToCartSuccessful(addANewCartResponse, addANewCartRequest);
+    }
+
 }

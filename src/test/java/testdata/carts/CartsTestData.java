@@ -85,4 +85,14 @@ public class CartsTestData {
         return request;
     }
 
+    public static AddANewCartRequest quantityLt0AddANewCartRequest() {
+        AddANewCartRequest request = new AddANewCartRequest();
+        request.setUserId(usersService.getAValidUserId());
+        request.setProducts(
+                new ArrayList<>(List.of(
+                        new AddANewCartRequest.Product("1", "-1"),
+                        new AddANewCartRequest.Product("2", "1")
+                )));
+        return request;
+    }
 }
