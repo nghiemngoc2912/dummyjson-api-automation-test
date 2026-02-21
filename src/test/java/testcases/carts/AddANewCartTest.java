@@ -5,14 +5,17 @@ import base.BaseTest;
 import constants.carts.AddANewCartMessage;
 import io.restassured.response.Response;
 import models.carts.AddANewCartRequest;
+import models.products.GetASingleProductResponse;
 import org.testng.annotations.Test;
 import services.CartsService;
+import services.ProductsService;
 import testdata.carts.CartsTestData;
 
 import java.util.ArrayList;
 
 public class AddANewCartTest extends BaseTest {
     CartsService cartsService = new CartsService();
+    ProductsService productsService = new ProductsService();
 
     @Test(description = "carts_aanc_001 - Add A New Cart Successfully")
     public void carts_aanc_001_addANewCartSuccessfully() {
@@ -115,6 +118,46 @@ public class AddANewCartTest extends BaseTest {
                         addANewCartRequest.getProducts()
                                 .stream()
                                 .filter(p -> Integer.parseInt(p.getQuantity()) < 0)
+                                .toList()
+                )
+        );
+
+        //verify cart response
+        CartsAssertion.verifyAddToCartSuccessful(addANewCartResponse, addANewCartRequest);
+    }
+
+    @Test(description = "carts_aanc_008 - Add A New Cart Successfully: Quantity = 0")
+    public void carts_aanc_008_quantityEq0() {
+        //test data
+        AddANewCartRequest addANewCartRequest = CartsTestData.quantityEq0AddANewCartRequest();
+        //call api add new cart
+        Response addANewCartResponse = cartsService.addANewCart(addANewCartRequest);
+
+        addANewCartRequest.setProducts(
+                new ArrayList<>(
+                        addANewCartRequest.getProducts()
+                                .stream()
+                                .filter(p -> Integer.parseInt(p.getQuantity()) == 0)
+                                .toList()
+                )
+        );
+
+        //verify cart response
+        CartsAssertion.verifyAddToCartSuccessful(addANewCartResponse, addANewCartRequest);
+    }
+
+    @Test(description = "carts_aanc_009 - Add A New Cart Successfully: Quantity > Stock")
+    public void carts_aanc_009_quantityGtStock() {
+        //test data
+        AddANewCartRequest addANewCartRequest = CartsTestData.quantityGtStockAddANewCartRequest();
+        //call api add new cart
+        Response addANewCartResponse = cartsService.addANewCart(addANewCartRequest);
+
+        addANewCartRequest.setProducts(
+                new ArrayList<>(
+                        addANewCartRequest.getProducts()
+                                .stream()
+                                .filter(p -> Integer.parseInt(p.getQuantity()) <= productsService.getASingleProduct(p.getId()).as(GetASingleProductResponse.class).getStock())
                                 .toList()
                 )
         );

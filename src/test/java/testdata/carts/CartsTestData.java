@@ -1,6 +1,8 @@
 package testdata.carts;
 
 import models.carts.AddANewCartRequest;
+import models.products.GetASingleProductResponse;
+import services.ProductsService;
 import services.UsersService;
 
 import java.util.ArrayList;
@@ -8,6 +10,7 @@ import java.util.List;
 
 public class CartsTestData {
     private static UsersService usersService = new UsersService();
+    private static ProductsService productsService = new ProductsService();
 
     public static AddANewCartRequest validAddANewCartRequest() {
         AddANewCartRequest request = new AddANewCartRequest();
@@ -95,4 +98,27 @@ public class CartsTestData {
                 )));
         return request;
     }
+
+    public static AddANewCartRequest quantityEq0AddANewCartRequest() {
+        AddANewCartRequest request = new AddANewCartRequest();
+        request.setUserId(usersService.getAValidUserId());
+        request.setProducts(
+                new ArrayList<>(List.of(
+                        new AddANewCartRequest.Product("1", "0"),
+                        new AddANewCartRequest.Product("2", "1")
+                )));
+        return request;
+    }
+
+    public static AddANewCartRequest quantityGtStockAddANewCartRequest() {
+        AddANewCartRequest request = new AddANewCartRequest();
+        request.setUserId(usersService.getAValidUserId());
+        request.setProducts(
+                new ArrayList<>(List.of(
+                        new AddANewCartRequest.Product("1", Integer.toString(productsService.getASingleProduct("1").as(GetASingleProductResponse.class).getStock()+1)),
+                        new AddANewCartRequest.Product("2", "1")
+                )));
+        return request;
+    }
+
 }

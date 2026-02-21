@@ -7,7 +7,7 @@ public class GetASingleProductResponse {
     private String id;
     private String title;
     private double price;
-    private int quantity;
+    private int stock;
     private double total;
     private double discountPercentage;
     private String thumbnail;
@@ -24,8 +24,8 @@ public class GetASingleProductResponse {
         return price;
     }
 
-    public int getQuantity() {
-        return quantity;
+    public int getStock() {
+        return stock;
     }
 
     public double getTotal() {
