@@ -1,6 +1,7 @@
 package testdata.carts;
 
 import models.carts.AddANewCartRequest;
+import models.carts.UpdateACartRequest;
 import models.products.GetASingleProductResponse;
 import services.ProductsService;
 import services.UsersService;
@@ -142,4 +143,16 @@ public class CartsTestData {
                 )));
         return request;
     }
+
+    public static UpdateACartRequest validUpdateACartRequest() {
+        UpdateACartRequest request = new UpdateACartRequest();
+        request.setMerge(false);
+        request.setProducts(
+                new ArrayList<>(List.of(
+                        new UpdateACartRequest.Product("1", "99"),
+                        new UpdateACartRequest.Product("2", "1")
+                )));
+        return request;
+    }
+
 }
