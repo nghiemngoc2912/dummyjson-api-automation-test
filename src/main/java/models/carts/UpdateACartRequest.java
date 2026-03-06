@@ -7,7 +7,7 @@ import java.util.List;
 
 @Data
 public class UpdateACartRequest {
-    Boolean merge;
+    Object merge;
     List<Product> products;
 
     @Data

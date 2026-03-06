@@ -225,7 +225,7 @@ public class CartsAssertion {
                 softAssert.assertEquals(responseProduct.getQuantity(), expectedQuantity,
                         "Merged quantity incorrect id=" + id);
 
-                // giữ nguyên thông tin cũ
+                // compare with old cart information
                 softAssert.assertEquals(responseProduct.getTitle(), oldProduct.getTitle());
                 softAssert.assertEquals(responseProduct.getPrice(), oldProduct.getPrice());
                 softAssert.assertEquals(responseProduct.getDiscountPercentage(), oldProduct.getDiscountPercentage());
