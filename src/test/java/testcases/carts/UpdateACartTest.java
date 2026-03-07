@@ -39,17 +39,26 @@ public class UpdateACartTest extends BaseTest {
     }
 
     @DataProvider(name = "mergeDataTrue")
-    public Object[] mergeDataTrue() {
-        return new Object[]{
-                true,
-                "abc"
+    public Object[][] mergeDataTrue() {
+        return new Object[][]{
+                {true, false},   // merge=true
+                {"abc", false},  // merge<>true/false
+                {true, true}
         };
     }
-    @Test(dataProvider = "mergeDataTrue", description = "carts_uac_002, carts_uac_004 - Update a Cart Successfully: merge = true/<>true/false")
-    public void carts_uac_002_004_UpdateACartSuccessfully_MergeEqTrue(Object mergeValue) {
+
+    @Test(dataProvider = "mergeDataTrue", description = "carts_uac_002, carts_uac_004, carts_uac_007 - Update a Cart Successfully: merge = true/<>true/false")
+    public void carts_uac_002_004_007_UpdateACartSuccessfully_MergeEqTrue(Object mergeValue, boolean useOldProduct) {
         //test data
         String cartId = cartsService.getAValidCartId();
-        UpdateACartRequest updateACartRequest = CartsTestData.validUpdateACartRequest();
+        UpdateACartRequest updateACartRequest;
+
+        if (useOldProduct) {
+            // carts_uac_007
+            updateACartRequest = CartsTestData.productExistInOldCartUpdateRequest(cartId);
+        } else {
+            updateACartRequest = CartsTestData.validUpdateACartRequest();
+        }
         updateACartRequest.setMerge(mergeValue);
 
         //call api get the old cart
@@ -60,6 +69,7 @@ public class UpdateACartTest extends BaseTest {
         //verify cart response success
         CartsAssertion.verifyUpdateACartSuccessful_MergeEqTrue(updateACartResponse, updateACartRequest, oldCartResponse);
     }
+
     @DataProvider(name = "invalidProductIdData")
     public Object[][] invalidProductIdData() {
         return new Object[][]{
@@ -67,6 +77,7 @@ public class UpdateACartTest extends BaseTest {
                 {null}
         };
     }
+
     @Test(dataProvider = "invalidProductIdData",
             description = "carts_uac_005, carts_uac_006 - Update a Cart Successfully: productId invalid")
     public void carts_uac_005_006_invalidProductId(Object productId) {

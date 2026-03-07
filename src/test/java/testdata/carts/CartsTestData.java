@@ -1,8 +1,10 @@
 package testdata.carts;
 
 import models.carts.AddANewCartRequest;
+import models.carts.CartResponse;
 import models.carts.UpdateACartRequest;
 import models.products.GetASingleProductResponse;
+import services.CartsService;
 import services.ProductsService;
 import services.UsersService;
 
@@ -12,6 +14,7 @@ import java.util.List;
 public class CartsTestData {
     private static UsersService usersService = new UsersService();
     private static ProductsService productsService = new ProductsService();
+    private static CartsService cartsService = new CartsService();
 
     public static AddANewCartRequest validAddANewCartRequest() {
         AddANewCartRequest request = new AddANewCartRequest();
@@ -155,4 +158,20 @@ public class CartsTestData {
         return request;
     }
 
+    public static UpdateACartRequest productExistInOldCartUpdateRequest(String cartId) {
+
+        CartResponse oldCart = cartsService
+                .getASingleCart(cartId)
+                .as(CartResponse.class);
+
+        String existingProductId = oldCart.getProducts().get(0).getId();
+
+        UpdateACartRequest request = new UpdateACartRequest();
+
+        request.setProducts(List.of(
+                new UpdateACartRequest.Product(existingProductId, "2")
+        ));
+
+        return request;
+    }
 }
