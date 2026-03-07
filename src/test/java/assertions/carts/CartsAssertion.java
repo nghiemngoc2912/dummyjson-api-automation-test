@@ -248,4 +248,56 @@ public class CartsAssertion {
 
         softAssert.assertAll();
     }
+    public static void verifyUpdateACart_ProductIdInvalidNotIncluded(
+            Response updateACartResponse,
+            UpdateACartRequest updateACartRequest,
+            Response oldCartResponse
+    ) {
+
+        verifyUpdateACartResponseSuccessCommon(updateACartResponse);
+        SoftAssert softAssert = new SoftAssert();
+
+        CartResponse response = updateACartResponse.as(CartResponse.class);
+        CartResponse oldCart = oldCartResponse.as(CartResponse.class);
+
+        List<CartResponse.Product> responseProducts = response.getProducts();
+        List<UpdateACartRequest.Product> requestProducts = updateACartRequest.getProducts();
+
+        double expectedTotal = 0;
+        double expectedDiscountedTotal = 0;
+        int expectedTotalQuantity = 0;
+
+        for (CartResponse.Product responseProduct : responseProducts) {
+
+            String id = responseProduct.getId();
+
+            // check product must exist in request
+            boolean existInRequest = requestProducts.stream()
+                    .anyMatch(p -> id.equals(p.getId()));
+
+            softAssert.assertTrue(existInRequest,
+                    "Invalid product was added to cart id=" + id);
+
+            int expectedQuantity = requestProducts.stream()
+                    .filter(p -> id.equals(p.getId()))
+                    .map(p -> Integer.parseInt(p.getQuantity()))
+                    .findFirst()
+                    .orElse(0);
+
+            verifyProductInformation(softAssert, responseProduct, expectedQuantity);
+
+            expectedTotal += responseProduct.getTotal();
+            expectedDiscountedTotal += responseProduct.getDiscountedPrice();
+            expectedTotalQuantity += responseProduct.getQuantity();
+        }
+
+        // verify cart level
+        softAssert.assertEquals(response.getUserId(), oldCart.getUserId());
+        softAssert.assertEquals(response.getTotal(), expectedTotal);
+        softAssert.assertEquals(response.getDiscountedTotal(), expectedDiscountedTotal);
+        softAssert.assertEquals(response.getTotalQuantity(), expectedTotalQuantity);
+        softAssert.assertEquals(response.getTotalProducts(), responseProducts.size());
+
+        softAssert.assertAll();
+    }
 }

@@ -24,7 +24,7 @@ public class UpdateACartTest extends BaseTest {
     }
 
     @Test(dataProvider = "mergeDataFalse", description = "carts_uac_001, carts_uac_003 - Update a Cart Successfully: merge = false/null/empty")
-    public void carts_uac_001_UpdateACartSuccessfully_MergeEqFalse(Object mergeValue) {
+    public void carts_uac_001_003_UpdateACartSuccessfully_MergeEqFalse(Object mergeValue) {
         //test data
         String cartId = cartsService.getAValidCartId();
         UpdateACartRequest updateACartRequest = CartsTestData.validUpdateACartRequest();
@@ -46,7 +46,7 @@ public class UpdateACartTest extends BaseTest {
         };
     }
     @Test(dataProvider = "mergeDataTrue", description = "carts_uac_002, carts_uac_004 - Update a Cart Successfully: merge = true/<>true/false")
-    public void carts_uac_002_UpdateACartSuccessfully_MergeEqTrue(Object mergeValue) {
+    public void carts_uac_002_004_UpdateACartSuccessfully_MergeEqTrue(Object mergeValue) {
         //test data
         String cartId = cartsService.getAValidCartId();
         UpdateACartRequest updateACartRequest = CartsTestData.validUpdateACartRequest();
@@ -59,5 +59,36 @@ public class UpdateACartTest extends BaseTest {
 
         //verify cart response success
         CartsAssertion.verifyUpdateACartSuccessful_MergeEqTrue(updateACartResponse, updateACartRequest, oldCartResponse);
+    }
+    @DataProvider(name = "invalidProductIdData")
+    public Object[][] invalidProductIdData() {
+        return new Object[][]{
+                {"999999999"},
+                {null}
+        };
+    }
+    @Test(dataProvider = "invalidProductIdData",
+            description = "carts_uac_005, carts_uac_006 - Update a Cart Successfully: productId invalid")
+    public void carts_uac_005_006_invalidProductId(Object productId) {
+
+        // test data
+        String cartId = cartsService.getAValidCartId();
+        UpdateACartRequest updateACartRequest = CartsTestData.validUpdateACartRequest();
+
+        // set invalid productId
+        updateACartRequest.getProducts().get(0).setId((String) productId);
+
+        // call api get the old cart
+        Response oldCartResponse = cartsService.getASingleCart(cartId);
+
+        // call api update new cart
+        Response updateACartResponse = cartsService.updateACart(cartId, updateACartRequest);
+
+        // verify cart response success
+        CartsAssertion.verifyUpdateACart_ProductIdInvalidNotIncluded(
+                updateACartResponse,
+                updateACartRequest,
+                oldCartResponse
+        );
     }
 }
