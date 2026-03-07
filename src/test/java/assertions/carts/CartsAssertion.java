@@ -20,60 +20,88 @@ public class CartsAssertion {
     private static ProductsService productsService = new ProductsService();
     private static CartsService cartsService = new CartsService();
 
+    private static void verifyProductInformation(
+            SoftAssert softAssert,
+            CartResponse.Product responseProduct,
+            int expectedQuantity
+    ) {
+        String id = responseProduct.getId();
+
+        Response productInform = productsService.getASingleProduct(id);
+        GetASingleProductResponse product = productInform.as(GetASingleProductResponse.class);
+
+        double expectedTotal = product.getPrice() * expectedQuantity;
+        double expectedDiscountedPrice =
+                Math.round(expectedQuantity * product.getPrice() * (1 - product.getDiscountPercentage() / 100));
+
+        softAssert.assertEquals(responseProduct.getQuantity(), expectedQuantity, "Quantity mismatch id=" + id);
+        softAssert.assertEquals(responseProduct.getTitle(), product.getTitle(), "Title mismatch id=" + id);
+        softAssert.assertEquals(responseProduct.getPrice(), product.getPrice(), "Price mismatch id=" + id);
+        softAssert.assertEquals(responseProduct.getTotal(), expectedTotal, "Total mismatch id=" + id);
+        softAssert.assertEquals(responseProduct.getDiscountPercentage(), product.getDiscountPercentage());
+        softAssert.assertEquals(responseProduct.getDiscountedPrice(), expectedDiscountedPrice);
+        softAssert.assertEquals(responseProduct.getThumbnail(), product.getThumbnail());
+    }
+
+    private static Map<String, Integer> buildRequestMap(List<? extends Object> products) {
+
+        Map<String, Integer> map = new HashMap<>();
+
+        if (products == null) return map;
+
+        for (Object obj : products) {
+
+            String id;
+            String quantity;
+
+            if (obj instanceof AddANewCartRequest.Product p) {
+                id = p.getId();
+                quantity = p.getQuantity();
+            } else {
+                UpdateACartRequest.Product p = (UpdateACartRequest.Product) obj;
+                id = p.getId();
+                quantity = p.getQuantity();
+            }
+
+            map.put(id, Integer.parseInt(quantity));
+        }
+
+        return map;
+    }
+
     public static void verifyAddToCartSuccessful(Response addANewCartResponse, AddANewCartRequest addANewCartRequest) {
         verifyAddToCartResponseSuccessCommon(addANewCartResponse);
         SoftAssert softAssert = new SoftAssert();
 
         CartResponse response = addANewCartResponse.as(CartResponse.class);
-        //verify list product size in request and response
-        List<CartResponse.Product> productsResponse = response.getProducts();
-        List<AddANewCartRequest.Product> productsRequest = addANewCartRequest.getProducts();
+        Map<String, Integer> requestMap = buildRequestMap(addANewCartRequest.getProducts());
 
         double expectedTotal = 0;
         double expectedDiscountedTotal = 0;
         int expectedTotalQuantity = 0;
-        if (productsRequest == null && productsResponse.isEmpty()) {
 
-        } else {
-            Assert.assertEquals(productsResponse.size(), productsRequest.size(), "The quantity of products in response is different");
+        for (CartResponse.Product p : response.getProducts()) {
+            String id = p.getId();
 
-            //sort 2 lists by id
-            productsResponse.sort(Comparator.comparing(CartResponse.Product::getId));
-            productsRequest.sort(Comparator.comparing(AddANewCartRequest.Product::getId));
-
-            //verify information
-            Response productInform;
-            GetASingleProductResponse product;
-            int expectedQuantity;
-            double expectedDiscountedPrice;
-            for (int i = 0; i < productsResponse.size(); i++) {
-                if (!productsResponse.get(i).getId().equals(productsRequest.get(i).getId())) {
-                    softAssert.fail("Id not match");
-                } else {
-                    String id = productsResponse.get(i).getId();
-                    expectedQuantity = Integer.parseInt(productsRequest.get(i).getQuantity());
-                    expectedTotalQuantity += expectedQuantity;
-                    softAssert.assertEquals(productsResponse.get(i).getQuantity(), expectedQuantity, "Quantity not match in product with id = " + id);
-                    productInform = productsService.getASingleProduct(id);
-                    product = productInform.as(GetASingleProductResponse.class);
-                    expectedTotal += product.getPrice() * expectedQuantity;
-                    expectedDiscountedPrice = Math.round(expectedQuantity * product.getPrice() * (1 - product.getDiscountPercentage() / 100));
-                    expectedDiscountedTotal += expectedDiscountedPrice;
-                    softAssert.assertEquals(productsResponse.get(i).getTitle(), product.getTitle(), "Title not match in product with id = " + id);
-                    softAssert.assertEquals(productsResponse.get(i).getPrice(), product.getPrice(), "Price not match in product with id = " + id);
-                    softAssert.assertEquals(productsResponse.get(i).getTotal(), product.getPrice() * expectedQuantity, "Total not match in product with id = " + id);
-                    softAssert.assertEquals(productsResponse.get(i).getDiscountPercentage(), product.getDiscountPercentage(), "DiscountPercentage not match in product with id = " + id);
-                    softAssert.assertEquals(productsResponse.get(i).getDiscountedPrice(), expectedDiscountedPrice, "DiscountedPrice not match in product with id = " + id);
-                    softAssert.assertEquals(productsResponse.get(i).getThumbnail(), product.getThumbnail(), "Thumbnail not match in product with id = " + id);
-                }
+            if (!requestMap.containsKey(id)) {
+                softAssert.fail("Unexpected product in response id=" + id);
+                continue;
             }
+
+            int quantity = requestMap.get(id);
+
+            verifyProductInformation(softAssert, p, quantity);
+
+            expectedTotal += p.getTotal();
+            expectedDiscountedTotal += p.getDiscountedPrice();
+            expectedTotalQuantity += quantity;
         }
 
         softAssert.assertEquals(response.getUserId(), Integer.parseInt(addANewCartRequest.getUserId()), "UserId incorrect");
         softAssert.assertEquals(response.getTotal(), expectedTotal, "Total incorrect");
         softAssert.assertEquals(response.getDiscountedTotal(), expectedDiscountedTotal, "DiscountedTotal incorrect");
         softAssert.assertEquals(response.getTotalQuantity(), expectedTotalQuantity, "TotalQuantity incorrect");
-        softAssert.assertEquals(response.getTotalProducts(), productsRequest != null ? productsRequest.size() : 0, "TotalProducts incorrect");
+        softAssert.assertEquals(response.getTotalProducts(), response.getProducts().size(), "TotalProducts incorrect");
 
         softAssert.assertAll();
     }
@@ -102,55 +130,36 @@ public class CartsAssertion {
 
         CartResponse response = updateACartResponse.as(CartResponse.class);
         CartResponse oldCart = oldCartResponse.as(CartResponse.class);
-        //verify list product size in request and response
-        List<CartResponse.Product> productsResponse = response.getProducts();
-        List<UpdateACartRequest.Product> productsRequest = updateACartRequest.getProducts();
+        Map<String, Integer> requestMap = buildRequestMap(updateACartRequest.getProducts());
 
+        Assert.assertEquals(response.getProducts().size(), requestMap.size(),
+                "Product size mismatch");
         double expectedTotal = 0;
         double expectedDiscountedTotal = 0;
         int expectedTotalQuantity = 0;
 
-        if (productsRequest == null && productsResponse.isEmpty()) {
+        for (CartResponse.Product p : response.getProducts()) {
+            String id = p.getId();
 
-        } else {
-            Assert.assertEquals(productsResponse.size(), productsRequest.size(), "The quantity of products in response is different");
-
-            //sort 2 lists by id
-            productsResponse.sort(Comparator.comparing(CartResponse.Product::getId));
-            productsRequest.sort(Comparator.comparing(UpdateACartRequest.Product::getId));
-
-            //verify information
-            Response productInform;
-            GetASingleProductResponse product;
-            int expectedQuantity;
-            double expectedDiscountedPrice = 0;
-            for (int i = 0; i < productsResponse.size(); i++) {
-                if (!productsResponse.get(i).getId().equals(productsRequest.get(i).getId())) {
-                    softAssert.fail("Id not match");
-                } else {
-                    String id = productsResponse.get(i).getId();
-                    expectedQuantity = Integer.parseInt(productsRequest.get(i).getQuantity());
-                    expectedTotalQuantity += expectedQuantity;
-                    softAssert.assertEquals(productsResponse.get(i).getQuantity(), expectedQuantity, "Quantity not match in product with id = " + id);
-                    productInform = productsService.getASingleProduct(id);
-                    product = productInform.as(GetASingleProductResponse.class);
-                    expectedTotal += product.getPrice() * expectedQuantity;
-                    expectedDiscountedPrice = Math.round(expectedQuantity * product.getPrice() * (1 - product.getDiscountPercentage() / 100));
-                    expectedDiscountedTotal += expectedDiscountedPrice;
-                    softAssert.assertEquals(productsResponse.get(i).getTitle(), product.getTitle(), "Title not match in product with id = " + id);
-                    softAssert.assertEquals(productsResponse.get(i).getPrice(), product.getPrice(), "Price not match in product with id = " + id);
-                    softAssert.assertEquals(productsResponse.get(i).getTotal(), product.getPrice() * expectedQuantity, "Total not match in product with id = " + id);
-                    softAssert.assertEquals(productsResponse.get(i).getDiscountPercentage(), product.getDiscountPercentage(), "DiscountPercentage not match in product with id = " + id);
-                    softAssert.assertEquals(productsResponse.get(i).getDiscountedPrice(), expectedDiscountedPrice, "DiscountedPrice not match in product with id = " + id);
-                    softAssert.assertEquals(productsResponse.get(i).getThumbnail(), product.getThumbnail(), "Thumbnail not match in product with id = " + id);
-                }
+            if (!requestMap.containsKey(id)) {
+                softAssert.fail("Unexpected product in response id=" + id);
+                continue;
             }
+
+            int quantity = requestMap.get(id);
+
+            verifyProductInformation(softAssert, p, quantity);
+
+            expectedTotal += p.getTotal();
+            expectedDiscountedTotal += p.getDiscountedPrice();
+            expectedTotalQuantity += quantity;
         }
+
         softAssert.assertEquals(response.getUserId(), oldCart.getUserId(), "UserId incorrect");
         softAssert.assertEquals(response.getTotal(), expectedTotal, "Total incorrect");
         softAssert.assertEquals(response.getDiscountedTotal(), expectedDiscountedTotal, "DiscountedTotal incorrect");
         softAssert.assertEquals(response.getTotalQuantity(), expectedTotalQuantity, "TotalQuantity incorrect");
-        softAssert.assertEquals(response.getTotalProducts(), productsRequest != null ? productsRequest.size() : 0, "TotalProducts incorrect");
+        softAssert.assertEquals(response.getTotalProducts(), response.getProducts().size(), "TotalProducts incorrect");
         softAssert.assertAll();
     }
 
@@ -174,38 +183,25 @@ public class CartsAssertion {
         CartResponse response = updateACartResponse.as(CartResponse.class);
         CartResponse oldCart = oldCartResponse.as(CartResponse.class);
 
-        List<CartResponse.Product> responseProducts = response.getProducts();
-        List<CartResponse.Product> oldProducts = oldCart.getProducts();
-        List<UpdateACartRequest.Product> requestProducts = updateACartRequest.getProducts();
-
-        // Convert old cart to map
+        Map<String, Integer> requestMap = buildRequestMap(updateACartRequest.getProducts());
         Map<String, CartResponse.Product> oldMap = new HashMap<>();
-        if (oldProducts != null) {
-            for (CartResponse.Product p : oldProducts) {
-                oldMap.put(p.getId(), p);
-            }
+
+        for (CartResponse.Product p : oldCart.getProducts()) {
+            oldMap.put(p.getId(), p);
         }
 
-        // Convert request to map
-        Map<String, Integer> requestMap = new HashMap<>();
-        if (requestProducts != null) {
-            for (UpdateACartRequest.Product p : requestProducts) {
-                requestMap.put(p.getId(), Integer.parseInt(p.getQuantity()));
-            }
-        }
-
+        int expectedTotalQuantity = 0;
         double expectedTotal = 0;
         double expectedDiscountedTotal = 0;
-        int expectedTotalQuantity = 0;
 
-        for (CartResponse.Product responseProduct : responseProducts) {
+        for (CartResponse.Product responseProduct : response.getProducts()) {
 
             String id = responseProduct.getId();
 
             CartResponse.Product oldProduct = oldMap.get(id);
             Integer requestQuantity = requestMap.get(id);
 
-            // CASE 1: product just in old cart
+            // CASE 1: product only in old cart
             if (oldProduct != null && requestQuantity == null) {
 
                 softAssert.assertEquals(responseProduct.getQuantity(), oldProduct.getQuantity(),
@@ -217,7 +213,7 @@ public class CartsAssertion {
                 softAssert.assertEquals(responseProduct.getThumbnail(), oldProduct.getThumbnail());
             }
 
-            // CASE 2: product in update cart with id exist in old cart (merge quantity)
+            // CASE 2: merge quantity
             else if (oldProduct != null) {
 
                 int expectedQuantity = oldProduct.getQuantity() + requestQuantity;
@@ -225,26 +221,18 @@ public class CartsAssertion {
                 softAssert.assertEquals(responseProduct.getQuantity(), expectedQuantity,
                         "Merged quantity incorrect id=" + id);
 
-                // compare with old cart information
                 softAssert.assertEquals(responseProduct.getTitle(), oldProduct.getTitle());
                 softAssert.assertEquals(responseProduct.getPrice(), oldProduct.getPrice());
                 softAssert.assertEquals(responseProduct.getDiscountPercentage(), oldProduct.getDiscountPercentage());
                 softAssert.assertEquals(responseProduct.getThumbnail(), oldProduct.getThumbnail());
             }
 
-            // CASE 3: product new
+            // CASE 3: new product
             else {
 
                 int expectedQuantity = requestQuantity;
 
-                Response productInform = productsService.getASingleProduct(id);
-                GetASingleProductResponse product = productInform.as(GetASingleProductResponse.class);
-
-                softAssert.assertEquals(responseProduct.getQuantity(), expectedQuantity);
-                softAssert.assertEquals(responseProduct.getTitle(), product.getTitle());
-                softAssert.assertEquals(responseProduct.getPrice(), product.getPrice());
-                softAssert.assertEquals(responseProduct.getDiscountPercentage(), product.getDiscountPercentage());
-                softAssert.assertEquals(responseProduct.getThumbnail(), product.getThumbnail());
+                verifyProductInformation(softAssert, responseProduct, expectedQuantity);
             }
 
             expectedTotal += responseProduct.getTotal();
@@ -252,10 +240,11 @@ public class CartsAssertion {
             expectedTotalQuantity += responseProduct.getQuantity();
         }
 
-        // verify cart level
         softAssert.assertEquals(response.getUserId(), oldCart.getUserId());
         softAssert.assertEquals(response.getTotalQuantity(), expectedTotalQuantity);
-        softAssert.assertEquals(response.getTotalProducts(), responseProducts.size());
+        softAssert.assertEquals(response.getTotal(), expectedTotal);
+        softAssert.assertEquals(response.getDiscountedTotal(), expectedDiscountedTotal);
+        softAssert.assertEquals(response.getTotalProducts(), response.getProducts().size());
 
         softAssert.assertAll();
     }

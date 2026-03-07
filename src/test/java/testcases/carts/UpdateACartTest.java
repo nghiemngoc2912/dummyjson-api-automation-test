@@ -15,15 +15,16 @@ public class UpdateACartTest extends BaseTest {
     ProductsService productsService = new ProductsService();
 
     @DataProvider(name = "mergeDataFalse")
-    public Boolean[] mergeDataFalse() {
-        return new Boolean[]{
+    public Object[] mergeDataFalse() {
+        return new Object[]{
                 false,
-                null
+                null,
+                ""
         };
     }
 
-    @Test(dataProvider = "mergeDataFalse", description = "carts_uac_001 - Update a Cart Successfully: merge = false")
-    public void carts_uac_001_UpdateACartSuccessfully_MergeEqFalse(Boolean mergeValue) {
+    @Test(dataProvider = "mergeDataFalse", description = "carts_uac_001, carts_uac_003 - Update a Cart Successfully: merge = false/null/empty")
+    public void carts_uac_001_UpdateACartSuccessfully_MergeEqFalse(Object mergeValue) {
         //test data
         String cartId = cartsService.getAValidCartId();
         UpdateACartRequest updateACartRequest = CartsTestData.validUpdateACartRequest();
@@ -44,7 +45,7 @@ public class UpdateACartTest extends BaseTest {
                 "abc"
         };
     }
-    @Test(dataProvider = "mergeDataTrue", description = "carts_uac_002 - Update a Cart Successfully: merge = true")
+    @Test(dataProvider = "mergeDataTrue", description = "carts_uac_002, carts_uac_004 - Update a Cart Successfully: merge = true/<>true/false")
     public void carts_uac_002_UpdateACartSuccessfully_MergeEqTrue(Object mergeValue) {
         //test data
         String cartId = cartsService.getAValidCartId();
@@ -59,5 +60,4 @@ public class UpdateACartTest extends BaseTest {
         //verify cart response success
         CartsAssertion.verifyUpdateACartSuccessful_MergeEqTrue(updateACartResponse, updateACartRequest, oldCartResponse);
     }
-
 }
