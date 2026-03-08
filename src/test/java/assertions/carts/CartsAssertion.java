@@ -7,7 +7,6 @@ import models.carts.AddANewCartRequest;
 import models.carts.CartResponse;
 import models.carts.UpdateACartRequest;
 import models.products.GetASingleProductResponse;
-import org.testng.Assert;
 import org.testng.asserts.SoftAssert;
 import services.CartsService;
 import services.ProductsService;
@@ -141,7 +140,7 @@ public class CartsAssertion {
 
         CartResponse response = updateACartResponse.as(CartResponse.class);
         CartResponse oldCart = oldCartResponse.as(CartResponse.class);
-        Map<String, Integer> requestMap = buildValidRequestMapForMergeFalse(updateACartRequest.getProducts());
+        Map<String, Integer> requestMap = buildValidRequestMap(updateACartRequest.getProducts());
 
         double expectedTotal = 0;
         double expectedDiscountedTotal = 0;
@@ -214,7 +213,7 @@ public class CartsAssertion {
         CartResponse response = updateACartResponse.as(CartResponse.class);
         CartResponse oldCart = oldCartResponse.as(CartResponse.class);
 
-        Map<String, Integer> requestMap = buildRequestMap(updateACartRequest.getProducts());
+        Map<String, Integer> requestMap = buildValidRequestMap(updateACartRequest.getProducts());
         Map<String, CartResponse.Product> oldMap = new HashMap<>();
 
         for (CartResponse.Product p : oldCart.getProducts()) {
@@ -261,6 +260,7 @@ public class CartsAssertion {
             // CASE 3: new product
             else {
 
+                softAssert.assertNotNull(requestQuantity, "Unexpected product in response id=" + id);
                 int expectedQuantity = requestQuantity;
 
                 verifyProductInformation(softAssert, responseProduct, expectedQuantity);
@@ -280,7 +280,7 @@ public class CartsAssertion {
         softAssert.assertAll();
     }
 
-    private static Map<String, Integer> buildValidRequestMapForMergeFalse(List<UpdateACartRequest.Product> products) {
+    private static Map<String, Integer> buildValidRequestMap(List<UpdateACartRequest.Product> products) {
         Map<String, Integer> map = new HashMap<>();
 
         if (products == null) return map;
