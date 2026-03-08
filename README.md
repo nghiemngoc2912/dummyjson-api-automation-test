@@ -1,5 +1,9 @@
 A project of API Automation Test of dummyjson-api, using RestAssured.
 
+Feature: Auth, Cart (Add, Update) because dummy-json do not provide db or order api, so here are the most important features one.
+
+Some concepts used in the project: DataProvider, Assert, JsonSchemaValidator
+
 In this project, I aim to build a solid architecture of api testing include:
 - main
   + apis: call the api
