@@ -96,7 +96,41 @@ public class UpdateACartTest extends BaseTest {
         Response updateACartResponse = cartsService.updateACart(cartId, updateACartRequest);
 
         // verify cart response success
-        CartsAssertion.verifyUpdateACart_ProductIdInvalidNotIncluded(
+        CartsAssertion.verifyUpdateACartSuccessful_MergeEqFalse(
+                updateACartResponse,
+                updateACartRequest,
+                oldCartResponse
+        );
+    }
+
+    @DataProvider(name = "invalidQuantityData")
+    public Object[][] invalidQuantityData() {
+        return new Object[][]{
+                {null},
+                {"-1"},
+                {"0"},
+                {"NaN"},
+                {"abc"}
+        };
+    }
+
+    @Test(dataProvider = "invalidQuantityData", description = "Update a Cart Successfully: quantity invalid")
+    public void carts_ua008_009_010_011_012_invalid_quantity(String quantity) {
+
+        String cartId = cartsService.getAValidCartId();
+
+        UpdateACartRequest updateACartRequest =
+                CartsTestData.validUpdateACartRequest();
+        updateACartRequest.getProducts().get(0).setQuantity(quantity);
+
+        // call api get the old cart
+        Response oldCartResponse = cartsService.getASingleCart(cartId);
+
+        // call api update new cart
+        Response updateACartResponse = cartsService.updateACart(cartId, updateACartRequest);
+
+        // verify cart response success
+        CartsAssertion.verifyUpdateACartSuccessful_MergeEqFalse(
                 updateACartResponse,
                 updateACartRequest,
                 oldCartResponse

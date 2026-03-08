@@ -19,6 +19,9 @@ import static org.hamcrest.Matchers.equalTo;
 public class CartsAssertion {
     private static ProductsService productsService = new ProductsService();
     private static CartsService cartsService = new CartsService();
+    private static final Set<String> INVALID_QUANTITY_VALUES = new HashSet<>(
+            Arrays.asList("-1", "0", "NaN", "abc")
+    );
 
     private static void verifyProductInformation(
             SoftAssert softAssert,
@@ -130,36 +133,56 @@ public class CartsAssertion {
 
         CartResponse response = updateACartResponse.as(CartResponse.class);
         CartResponse oldCart = oldCartResponse.as(CartResponse.class);
-        Map<String, Integer> requestMap = buildRequestMap(updateACartRequest.getProducts());
+        Map<String, Integer> requestMap = buildValidRequestMapForMergeFalse(updateACartRequest.getProducts());
 
-        Assert.assertEquals(response.getProducts().size(), requestMap.size(),
-                "Product size mismatch");
         double expectedTotal = 0;
         double expectedDiscountedTotal = 0;
         int expectedTotalQuantity = 0;
+        int expectedValidProductCount = 0;
+        for (Map.Entry<String, Integer> entry : requestMap.entrySet()) {
 
-        for (CartResponse.Product p : response.getProducts()) {
-            String id = p.getId();
+            String id = entry.getKey();
+            int quantity = entry.getValue();
 
-            if (!requestMap.containsKey(id)) {
-                softAssert.fail("Unexpected product in response id=" + id);
-                continue;
+            Response productResponse = productsService.getASingleProduct(id);
+
+            if (productResponse.statusCode() != 200) {
+                continue; // invalid productId
             }
 
-            int quantity = requestMap.get(id);
+            expectedValidProductCount++;
 
-            verifyProductInformation(softAssert, p, quantity);
+            CartResponse.Product responseProduct = response.getProducts().stream()
+                    .filter(p -> id.equals(p.getId()))
+                    .findFirst()
+                    .orElse(null);
 
-            expectedTotal += p.getTotal();
-            expectedDiscountedTotal += p.getDiscountedPrice();
-            expectedTotalQuantity += quantity;
+            softAssert.assertNotNull(responseProduct,
+                    "Valid product missing from response id=" + id);
+
+            if (responseProduct != null) {
+
+                verifyProductInformation(softAssert, responseProduct, quantity);
+
+                expectedTotal += responseProduct.getTotal();
+                expectedDiscountedTotal += responseProduct.getDiscountedPrice();
+                expectedTotalQuantity += quantity;
+            }
+        }
+
+        // verify contains only product in request
+        for (CartResponse.Product p : response.getProducts()) {
+
+            if (!requestMap.containsKey(p.getId())) {
+                softAssert.fail("Unexpected product in response id=" + p.getId());
+            }
         }
 
         softAssert.assertEquals(response.getUserId(), oldCart.getUserId(), "UserId incorrect");
         softAssert.assertEquals(response.getTotal(), expectedTotal, "Total incorrect");
         softAssert.assertEquals(response.getDiscountedTotal(), expectedDiscountedTotal, "DiscountedTotal incorrect");
         softAssert.assertEquals(response.getTotalQuantity(), expectedTotalQuantity, "TotalQuantity incorrect");
-        softAssert.assertEquals(response.getTotalProducts(), response.getProducts().size(), "TotalProducts incorrect");
+        softAssert.assertEquals(response.getTotalProducts(), expectedValidProductCount, "TotalProducts incorrect");
         softAssert.assertAll();
     }
 
@@ -248,56 +271,57 @@ public class CartsAssertion {
 
         softAssert.assertAll();
     }
-    public static void verifyUpdateACart_ProductIdInvalidNotIncluded(
-            Response updateACartResponse,
-            UpdateACartRequest updateACartRequest,
-            Response oldCartResponse
-    ) {
 
-        verifyUpdateACartResponseSuccessCommon(updateACartResponse);
-        SoftAssert softAssert = new SoftAssert();
+    private static Map<String, Integer> buildValidRequestMapForMergeFalse(List<UpdateACartRequest.Product> products) {
+        Map<String, Integer> map = new HashMap<>();
 
-        CartResponse response = updateACartResponse.as(CartResponse.class);
-        CartResponse oldCart = oldCartResponse.as(CartResponse.class);
+        if (products == null) return map;
 
-        List<CartResponse.Product> responseProducts = response.getProducts();
-        List<UpdateACartRequest.Product> requestProducts = updateACartRequest.getProducts();
+        for (UpdateACartRequest.Product product : products) {
+            if (product == null) {
+                continue;
+            }
 
-        double expectedTotal = 0;
-        double expectedDiscountedTotal = 0;
-        int expectedTotalQuantity = 0;
+            String id = product.getId();
+            Integer quantity = parseQuantity(product.getQuantity());
 
-        for (CartResponse.Product responseProduct : responseProducts) {
+            if (quantity == null || !isValidProductId(id) || isQuantityExceedStock(id, quantity)) {
+                continue;
+            }
 
-            String id = responseProduct.getId();
-
-            // check product must exist in request
-            boolean existInRequest = requestProducts.stream()
-                    .anyMatch(p -> id.equals(p.getId()));
-
-            softAssert.assertTrue(existInRequest,
-                    "Invalid product was added to cart id=" + id);
-
-            int expectedQuantity = requestProducts.stream()
-                    .filter(p -> id.equals(p.getId()))
-                    .map(p -> Integer.parseInt(p.getQuantity()))
-                    .findFirst()
-                    .orElse(0);
-
-            verifyProductInformation(softAssert, responseProduct, expectedQuantity);
-
-            expectedTotal += responseProduct.getTotal();
-            expectedDiscountedTotal += responseProduct.getDiscountedPrice();
-            expectedTotalQuantity += responseProduct.getQuantity();
+            map.put(id, quantity);
         }
 
-        // verify cart level
-        softAssert.assertEquals(response.getUserId(), oldCart.getUserId());
-        softAssert.assertEquals(response.getTotal(), expectedTotal);
-        softAssert.assertEquals(response.getDiscountedTotal(), expectedDiscountedTotal);
-        softAssert.assertEquals(response.getTotalQuantity(), expectedTotalQuantity);
-        softAssert.assertEquals(response.getTotalProducts(), responseProducts.size());
-
-        softAssert.assertAll();
+        return map;
     }
+
+    private static Integer parseQuantity(String quantity) {
+        if (quantity == null || INVALID_QUANTITY_VALUES.contains(quantity)) {
+            return null;
+        }
+
+        try {
+            int value = Integer.parseInt(quantity);
+            return value > 0 ? value : null;
+        } catch (NumberFormatException ex) {
+            return null;
+        }
+    }
+
+    private static boolean isValidProductId(String productId) {
+        if (productId == null || productId.trim().isEmpty()) {
+            return false;
+        }
+        return productsService.getASingleProduct(productId).statusCode() == 200;
+    }
+
+    private static boolean isQuantityExceedStock(String productId, int quantity) {
+        Response productResponse = productsService.getASingleProduct(productId);
+        if (productResponse.statusCode() != 200) {
+            return true;
+        }
+        int stock = productResponse.as(GetASingleProductResponse.class).getStock();
+        return quantity > stock;
+    }
+
 }
