@@ -17,10 +17,10 @@ jobs:
     if: ${{ github.event.inputs.feature == 'auth' }}
     uses: ./.github/workflows/run-template.yml
     with:
-      suite: test-suites/auth-suite.xml
+      suite: test-suites/auth.xml
 
   carts:
     if: ${{ github.event.inputs.feature == 'carts' }}
     uses: ./.github/workflows/run-template.yml
     with:
-      suite: test-suites/carts-suite.xml
+      suite: test-suites/carts.xml
