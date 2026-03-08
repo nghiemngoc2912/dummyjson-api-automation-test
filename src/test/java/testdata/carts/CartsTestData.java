@@ -178,6 +178,10 @@ public class CartsTestData {
         return request;
     }
 
+    public static String cartIdNotExist() {
+        return "1000000000";
+    }
+
     public static UpdateACartRequest productExistInOldCartUpdateRequest(String cartId) {
 
         CartResponse oldCart = cartsService

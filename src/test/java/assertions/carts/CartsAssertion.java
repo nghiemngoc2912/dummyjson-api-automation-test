@@ -127,6 +127,14 @@ public class CartsAssertion {
 
     }
 
+    public static void verifyUpdateACartUnsuccessful(Response updateACartResponse, String message, int statusCode) {
+        updateACartResponse
+                .then()
+                .log().ifValidationFails()
+                .statusCode(statusCode)
+                .body("message", equalTo(message));
+    }
+
     public static void verifyUpdateACartSuccessful_MergeEqFalse(Response updateACartResponse, UpdateACartRequest updateACartRequest, Response oldCartResponse) {
         verifyUpdateACartResponseSuccessCommon(updateACartResponse);
         SoftAssert softAssert = new SoftAssert();

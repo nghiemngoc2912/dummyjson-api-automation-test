@@ -2,6 +2,7 @@ package testcases.carts;
 
 import assertions.carts.CartsAssertion;
 import base.BaseTest;
+import constants.carts.UpdateACartMessage;
 import io.restassured.response.Response;
 import models.carts.UpdateACartRequest;
 import org.testng.annotations.DataProvider;
@@ -156,6 +157,23 @@ public class UpdateACartTest extends BaseTest {
                 updateACartResponse,
                 updateACartRequest,
                 oldCartResponse
+        );
+    }
+
+    @Test(description = "carts_uac_014 - Update a Cart Unsuccessful: CartId not exist")
+    public void carts_uac_014_cartIdNotExist() {
+        // test data
+        String cartId = CartsTestData.cartIdNotExist();
+        UpdateACartRequest updateACartRequest = CartsTestData.validUpdateACartRequest();
+
+        // call api update cart
+        Response updateACartResponse = cartsService.updateACart(cartId, updateACartRequest);
+
+        // verify response unsuccess
+        CartsAssertion.verifyUpdateACartUnsuccessful(
+                updateACartResponse,
+                String.format(UpdateACartMessage.CARTID_NOT_EXIST, cartId),
+                404
         );
     }
 }
