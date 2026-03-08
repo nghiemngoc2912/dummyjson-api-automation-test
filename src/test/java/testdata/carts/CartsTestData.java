@@ -158,6 +158,26 @@ public class CartsTestData {
         return request;
     }
 
+    public static UpdateACartRequest quantityGtStockUpdateACartRequest() {
+        UpdateACartRequest request = new UpdateACartRequest();
+        request.setMerge(false);
+        request.setProducts(
+                new ArrayList<>(List.of(
+                        new UpdateACartRequest.Product(
+                                "1",
+                                Integer.toString(
+                                        productsService
+                                                .getASingleProduct("1")
+                                                .as(GetASingleProductResponse.class)
+                                                .getStock() + 1
+                                )
+                        ),
+                        new UpdateACartRequest.Product("2", "1")
+                ))
+        );
+        return request;
+    }
+
     public static UpdateACartRequest productExistInOldCartUpdateRequest(String cartId) {
 
         CartResponse oldCart = cartsService

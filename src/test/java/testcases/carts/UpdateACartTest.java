@@ -136,4 +136,26 @@ public class UpdateACartTest extends BaseTest {
                 oldCartResponse
         );
     }
+
+    @Test(description = "Update a Cart Successfully: quantity exceed stock")
+    public void carts_ua013_invalid_quantity_exceed_stock() {
+
+        String cartId = cartsService.getAValidCartId();
+
+        UpdateACartRequest updateACartRequest =
+                CartsTestData.quantityGtStockUpdateACartRequest();
+
+        // call api get the old cart
+        Response oldCartResponse = cartsService.getASingleCart(cartId);
+
+        // call api update new cart
+        Response updateACartResponse = cartsService.updateACart(cartId, updateACartRequest);
+
+        // verify cart response success
+        CartsAssertion.verifyUpdateACartSuccessful_MergeEqFalse(
+                updateACartResponse,
+                updateACartRequest,
+                oldCartResponse
+        );
+    }
 }
