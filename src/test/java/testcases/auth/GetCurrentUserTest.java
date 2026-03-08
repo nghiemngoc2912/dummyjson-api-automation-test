@@ -9,6 +9,7 @@ import org.testng.annotations.Test;
 import services.AuthService;
 import testdata.auth.AuthTestData;
 
+@Test(description = "Test class for Get Current User API scenarios.")
 public class GetCurrentUserTest extends BaseTest {
     AuthService authService = new AuthService();
 

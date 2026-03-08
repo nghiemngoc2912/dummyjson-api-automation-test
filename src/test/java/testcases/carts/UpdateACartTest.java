@@ -11,6 +11,7 @@ import services.CartsService;
 import services.ProductsService;
 import testdata.carts.CartsTestData;
 
+@Test(description = "Test class for Update A Cart API scenarios.")
 public class UpdateACartTest extends BaseTest {
     CartsService cartsService = new CartsService();
     ProductsService productsService = new ProductsService();

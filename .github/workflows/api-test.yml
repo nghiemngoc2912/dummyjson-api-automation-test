@@ -1,0 +1,26 @@
+name: API Automation
+
+on:
+  workflow_dispatch:
+    inputs:
+      feature:
+        description: "Feature to run"
+        required: true
+        type: choice
+        options:
+          - auth
+          - carts
+
+jobs:
+
+  auth:
+    if: ${{ github.event.inputs.feature == 'auth' }}
+    uses: ./.github/workflows/run-template.yml
+    with:
+      suite: test-suites/auth-suite.xml
+
+  carts:
+    if: ${{ github.event.inputs.feature == 'carts' }}
+    uses: ./.github/workflows/run-template.yml
+    with:
+      suite: test-suites/carts-suite.xml

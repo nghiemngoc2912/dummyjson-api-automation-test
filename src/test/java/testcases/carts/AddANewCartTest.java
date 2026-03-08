@@ -13,6 +13,7 @@ import testdata.carts.CartsTestData;
 
 import java.util.ArrayList;
 
+@Test(description = "Test class for Add A New Cart API scenarios.")
 public class AddANewCartTest extends BaseTest {
     CartsService cartsService = new CartsService();
     ProductsService productsService = new ProductsService();

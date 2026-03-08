@@ -9,6 +9,7 @@ import org.testng.annotations.Test;
 import services.AuthService;
 import testdata.auth.AuthTestData;
 
+@Test(description = "Test class for Login API scenarios.")
 public class LoginTest extends BaseTest {
     AuthService authService = new AuthService();
 
